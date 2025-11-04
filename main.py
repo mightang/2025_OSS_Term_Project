@@ -3,9 +3,9 @@ import random
 from collections import deque
 import pygame
 
-ROWS = 18
-COLS = 18
-NUM_MINES = 40
+ROWS = 20
+COLS = 20
+NUM_MINES = 80
 
 CELL = 32
 HUD_H = 80
@@ -19,7 +19,9 @@ WIN_H = HUD_H + BOARD_H
 COLOR_BG = (29, 31, 33)
 COLOR_HUD_BG = (36, 39, 43)
 COLOR_GRID = (58, 63, 68)
-COLOR_CELL = (43, 47, 51)
+
+COLOR_CELL_COVERED = (43, 47, 51)
+COLOR_CELL_REVEALED = (52, 56, 60)
 COLOR_HOVER = (55, 60, 66)
 COLOR_TEXT = (230, 233, 236)
 COLOR_NUM = {
@@ -131,6 +133,22 @@ class BoardState:
         if self.revealed_safe == total_safe:
             self.game_over = True
             self.victory = True
+
+    def chord(self, r, c):
+        if self.game_over or not self.in_bounds(r, c):
+            return
+        if not self.revealed[r][c]:
+            return
+        
+        n = self.adj[r][c]
+        if n <= 0:
+            return
+        flags = sum(1 for nr, nc in self.neighbors(r, c) if self.flagged[nr][nc])
+        if flags != n:
+            return
+        for nr, nc in self.neighbors(r, c):
+            if not self.revealed[nr][nc] and not self.flagged[nr][nc]:
+                self.reveal(nr, nc)
                     
 # 좌표 변환
 def screen_to_cell(x : int, y : int):
@@ -172,10 +190,8 @@ def draw_board(surf: pygame.Surface, font: pygame.font.Font, state: BoardState, 
         for c in range(COLS):
             rect = cell_to_rect(r, c)
 
-            pygame.draw.rect(surf, COLOR_CELL, rect)
-
-            ch = None
-            color = COLOR_TEXT
+            base_color = COLOR_CELL_REVEALED if state.revealed[r][c] else COLOR_CELL_COVERED
+            pygame.draw.rect(surf, base_color, rect)
 
             if state.revealed[r][c] or (state.game_over and state.mines[r][c]):
                 if state.mines[r][c]:
@@ -205,12 +221,6 @@ def draw_board(surf: pygame.Surface, font: pygame.font.Font, state: BoardState, 
     for r in range(ROWS + 1):
         y = HUD_H + r * CELL
         pygame.draw.line(surf, COLOR_GRID, (0, y), (BOARD_W, y), 1)
-
-def draw_debug_overlay(surf: pygame.Surface, font: pygame.font.Font, hover_cell):
-    text = f"Hover: {hover_cell if hover_cell is not None else 'None'}"
-    img = font.render(text, True, COLOR_TEXT)
-    surf.blit(img, (16, HUD_H + 8))
-
 
 def main():
     pygame.init()
@@ -253,9 +263,12 @@ def main():
                 if cell is not None:
                     r, c = cell
                     if event.button == 1:
-                        if state.first_move and not state.game_over:
-                            timer_running = True
-                        state.reveal(r, c)
+                        if state.revealed[r][c]:
+                            state.chord(r, c)
+                        else:
+                            if state.first_move and not state.game_over:
+                                timer_running = True
+                            state.reveal(r, c)
                     elif event.button == 3:
                         state.toggle_flag(r, c)
 
