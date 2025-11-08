@@ -8,7 +8,6 @@ def axial_to_pixel(q, r, size):
     y = size * (1.5 * r)
     return (x, y)
 
-# 픽셀 좌표를 
 def pixel_to_axial(x, y, size):
     q = (x * SQRT3 / 3 - y / 3) / size
     r = (y * 2 / 3) / size
