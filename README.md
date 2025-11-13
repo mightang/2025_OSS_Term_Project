@@ -4,7 +4,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| 프로젝트명 | HEXFIELD: Galactic Restoration |
+| 프로젝트명 | 미정 |
 | 장르 | 퍼즐 / 논리 / 전략 |
 | 개발 환경 | Python 3.11, pygame |
 | 타겟 플랫폼 | PC (Windows / macOS) |
