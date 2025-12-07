@@ -237,6 +237,8 @@ TermProject/
 ---
 
 ## 라이선스
+**[육각형 좌표계 참고 자료]**<br>
+(https://www.redblobgames.com/grids/hexagons/)
 
 **[Font]**<br>
 (https://noonnu.cc/font_page/694)
